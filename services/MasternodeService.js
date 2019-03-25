@@ -61,9 +61,9 @@ MasternodeService.prototype.updateMasternodeBasics = function() {
       protocol,
       lastseen,
       activeseconds
-    }).then(function(response) => {
+    }).then(function(response) {
       self.common.log.info('[MasternodeService] mn updated ' + pubkey);
-    }).catch(function(error) => {
+    }).catch(function(error) {
       self.common.log.info('[MasternodeService] error' + error);
     });
   });
