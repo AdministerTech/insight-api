@@ -121,17 +121,17 @@ mnInfo {
 MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
   let self = this;
   return new Promise(function(resolve, reject) {
-    const connectOptions = Object.create(NodeDefaultOptions, {host: mnInfo.host, port: mnInfo.port});
-    self.common.log.info('[MasternodeService] p2p conn info ' + connectOptions);
+    const connectOptions = Object.assign(NodeDefaultOptions, {host: mnInfo.host, port: mnInfo.port});
+    // self.common.log.info('[MasternodeService] p2p conn info ' + connectOptions);
     const mnConnection = new BTCP2P(connectOptions);
     let canConnect = false;
     let version = {};
     mnConnection.on('connect', function(e) {
-      self.common.log.info('[MasternodeService] p2p connected ' + mnInfo.host);
+      // self.common.log.info('[MasternodeService] p2p connected ' + mnInfo.host);
       canConnect = true;
     });
     mnConnection.on('version', function(e) {
-      self.common.log.info('[MasternodeService] p2p version ' + e);
+      // self.common.log.info('[MasternodeService] p2p version ' + e);
       version = Object.create(e, {pubkey: mnInfo.pubkey});
       mnConnection.client.end();
     });
