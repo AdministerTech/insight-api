@@ -16,13 +16,15 @@ function getMasternodePubkey(pubkey) {
     pubkey: string
   }
   */
-MasternodeRepository.prototype.updateMasternodeBasic = function(mnInfo) {
+MasternodeRepository.prototype.updateMasternodeBasics = function(mnInfo) {
   return MasternodeStats.update({MasternodePubkey: mnInfo.pubkey}, {$set: {
     MasternodeOutputHash: mnInfo.outputHash,
     MasternodeOutputIndex: mnInfo.outputIndex,
     MasternodeIP: mnInfo.host,
     MasternodePort: mnInfo.port,
-    MasternodePubkey: mnInfo.pubkey
+    MasternodePubkey: mnInfo.pubkey,
+    MasternodeProtocol: mnInfo.protocol,
+    MasternodeActiveSeconds: mnInfo.activeseconds
   }}, {upsert: true}).exec()
 }
 
@@ -42,7 +44,6 @@ MasternodeRepository.prototype.updateMasternodeLastSeen = function(pubkey, lastS
 MasternodeRepository.prototype.updateMasternodeP2P = function(mnInfo) {
   const next = Date.now() + 86400 * 1000;
   return MasternodeStats.update({MasternodePubkey: mnInfo.pubkey}, {$set: {
-    MasternodeProtocol: mnInfo.protocol,
     MasternodeDaemonVersion: mnInfo.version,
     Portcheck: {
       Result: (mnInfo.canConnect) ? 'open': 'closed',
