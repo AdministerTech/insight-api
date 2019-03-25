@@ -20,16 +20,16 @@ MasternodeService.prototype.tryGetList = function () {
   const listPoll = setInterval(function() {
     const mnListHandler = function(error, result) {
       if (error) {
-        this.common.log.info('[MasternodeService] error' + error);
+        self.common.log.info('[MasternodeService] error' + error);
       } else {
         if (result.length > 0) {
           list = result;
-          this.common.log.info('[MasternodeService] got mn list. length: ' + list.length);
+          self.common.log.info('[MasternodeService] got mn list. length: ' + list.length);
           clearInterval(listPoll);
         }
       }
     }
-    this.common.log.info('[MasternodeService] trying to get mn list');
+    self.common.log.info('[MasternodeService] trying to get mn list');
     self.getMNList(mnListHandler);
   }, 5000);
 };
