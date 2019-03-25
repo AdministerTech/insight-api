@@ -95,9 +95,9 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
     const port = fullHost[1];
     const pubkey = mn.payee;
     p2pInfoPromises.push(self.getP2PInfo({
-      host,
-      port,
-      pubkey
+      host: host,
+      port: port,
+      pubkey: pubkey
     }));
   });
   Promise.all(p2pInfoPromises)
