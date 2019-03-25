@@ -24,6 +24,7 @@ MasternodeRepository.prototype.updateMasternodeBasics = function(mnInfo) {
     MasternodePort: mnInfo.port,
     MasternodePubkey: mnInfo.pubkey,
     MasternodeProtocol: mnInfo.protocol,
+    MasternodeLastSeen: mnInfo.lastseen,
     MasternodeActiveSeconds: mnInfo.activeseconds
   }}, {upsert: true}).exec()
 }

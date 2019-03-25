@@ -12,7 +12,8 @@ const masternodeStatsSchema = new mongoose.Schema({
   },
   MasternodeIP: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   MasternodeTor: {
     type: String

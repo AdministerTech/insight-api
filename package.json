@@ -35,6 +35,7 @@
     "async": "*",
     "bignumber.js": "^4.0.2",
     "body-parser": "^1.13.3",
+    "btcp2p": "github:j4ys0n/btcp2p",
     "compression": "^1.6.1",
     "lodash": "^2.4.1",
     "lru-cache": "^4.0.1",
