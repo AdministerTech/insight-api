@@ -8,16 +8,16 @@ MasternodeService.prototype.updateMasternodeLastSeen = function() {
 
 }
 
-MasternodeRepository.prototype.updateMasternodeP2P = function() {
+MasternodeService.prototype.updateMasternodeP2P = function() {
 
 }
 
-MasternodeRepository.prototype.updateMasternodeBalance = function() {
+MasternodeService.prototype.updateMasternodeBalance = function() {
 
 }
 
-MasternodeRepository.prototype.updateMasternodeLastPaid = function () {
-  
+MasternodeService.prototype.updateMasternodeLastPaid = function () {
+
 }
 
 module.exports = MasternodeService;
