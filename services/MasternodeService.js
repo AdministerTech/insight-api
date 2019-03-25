@@ -128,6 +128,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
       canConnect = true;
     });
     mnConnection.on('version', function(e) {
+      console.log(e);
       version = Object.create(e, {pubkey: mnInfo.pubkey});
       mnConnection.client.end();
     });
