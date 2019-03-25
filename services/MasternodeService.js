@@ -132,7 +132,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
     });
     mnConnection.on('version', function(e) {
       // self.common.log.info('[MasternodeService] p2p version ' + e);
-      version = Object.create(e, {pubkey: mnInfo.pubkey});
+      version = Object.assign(e, {pubkey: mnInfo.pubkey});
       mnConnection.client.end();
     });
     mnConnection.on('error', function(e) {
