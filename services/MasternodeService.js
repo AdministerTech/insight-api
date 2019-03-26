@@ -89,7 +89,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
   const sequentialPromises = function(promises, success, error) {
     let index = 0;
     const executePromise = function(promise, success, error) {
-      promise.then(function(response) {
+      await promise.then(function(response) {
         self.common.log.info('[MasternodeService] got p2p response: ' + response.client + response.host);
         self.updateP2PinDB(response);
       })
@@ -103,6 +103,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
         }
       });
     }
+
     executePromise(promises[index]);
   }
 
