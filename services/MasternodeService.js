@@ -118,7 +118,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
   let index = 0;
   const executePromise = function(promise) {
     promise.then(function(response) {
-      self.common.log.info('[MasternodeService] got p2p response: ' + response.client + ' ' + response.host + ' ' + response.pubkey);
+      self.common.log.info('[MasternodeService] got p2p response: ' + response.client + ' ' + response.pubkey);
       self.updateP2PinDB(response);
       if (index < masternodes.length - 1) {
         index++;
@@ -219,7 +219,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 3000) {
       self.common.log.info('[MasternodeService] got version: ' + connectOptions.host + ' client: ' + version.client);
     });
     mnConnection.on('error', function(e) {
-      self.common.log.info('[MasternodeService] BTCP2P onError: ' + connectOptions.host + ' client: ' + e.error.message);
+      self.common.log.info('[MasternodeService] BTCP2P onError: ' + connectOptions.host + ' error: ' + JSON.stringify(e));
       version = Object.assign({}, {pubkey: mnInfo.pubkey, error: e});
       reject(Object.assign({}, canConnect, {pubkey: mnInfo.pubkey, error: e}));
     });
