@@ -85,6 +85,26 @@ MasternodeService.prototype.updateMasternodeBasics = function() {
 MasternodeService.prototype.updateMasternodesP2P = function() {
   let self = this;
   let p2pInfoPromises = [];
+
+  const sequentialPromises = function(promises, success, error) {
+    let index = 0;
+    const executePromise = function(promise, success, error) {
+      promise.then(function(response) {
+        self.updateP2PinDB(response);
+      })
+      .catch(function(error) {
+        self.common.log.info('[MasternodeService] p2p promise error ' + error);
+      })
+      .finally(function() {
+        if (index < promises.length - 1) {
+          index++;
+          executePromise(promises[index]);
+        }
+      });
+    }
+    executePromise(promises[index]);
+  }
+
   self.mnListFromNode.forEach(function(mn) {
     const fullHost = mn.ip.split(':');
     const host = fullHost[0];
@@ -96,35 +116,43 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
       pubkey
     }));
   });
-  Promise.all(p2pInfoPromises)
-  .then(function(responses) {
-    self.updateP2PinDB(responses);
-  })
-  .catch(function(error) {
-    self.common.log.info('[MasternodeService] p2p promise error ' + error);
-  })
+
+  sequentialPromises(p2pInfoPromises);
 };
 
-MasternodeService.prototype.updateP2PinDB = function(p2pResponses) {
+
+
+MasternodeService.prototype.updateP2PinDB = function(response) {
   let self = this;
   let promises = [];
-  p2pResponses.forEach(function(response) {
-    promises.push(self.masternodeRepository.updateMasternodeP2P({
-      pubkey: response.pubkey,
-      version: (response.canConnect) ? String(response.version) : '',
-      canConnect: response.canConnect,
-      subver: (response.canConnect) ? response.client : ''
-    }));
-  });
-  Promise.all(promises)
-  .then(function(responses) {
-    //success
+  self.common.log.info('[MasternodeService] got p2p responses: ' + response.client);
+  // p2pResponses.forEach(function(response) {
+  //   self.common.log.info('[MasternodeService] client: ' + response.client);
+  //   promises.push();
+  // });
+  // Promise.all(promises)
+  // .then(function(responses) {
+  //   //success
+  //   self.masternodeRepository.updateInternalCache();
+  // })
+  // .catch(function(error) {
+  //   //fail
+  //   self.common.log.info('[MasternodeService] error ' + error);
+  // });
+
+
+  self.masternodeRepository.updateMasternodeP2P({
+    pubkey: response.pubkey,
+    version: (response.canConnect) ? String(response.version) : '',
+    canConnect: response.canConnect,
+    subver: (response.canConnect) ? response.client : ''
+  })
+  .then(function(result) {
     self.masternodeRepository.updateInternalCache();
   })
   .catch(function(error) {
-    //fail
     self.common.log.info('[MasternodeService] error ' + error);
-  });
+  })
 }
 
 /*
@@ -143,10 +171,12 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
     let version = {};
     mnConnection.on('connect', function(e) {
       canConnect = true;
+      self.common.log.info('[MasternodeService] connected to: ' + connectOptions.host);
     });
     mnConnection.on('version', function(e) {
       version = Object.assign({}, e, {pubkey: mnInfo.pubkey});
       mnConnection.client.end();
+      self.common.log.info('[MasternodeService] got version: ' + connectOptions.host + ' client: ' + e.client);
     });
     mnConnection.on('error', function(e) {
       resolve({
