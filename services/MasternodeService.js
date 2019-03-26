@@ -111,9 +111,9 @@ MasternodeService.prototype.updateP2PinDB = function(p2pResponses) {
   p2pResponses.forEach(function(response) {
     promises.push(self.masternodeRepository.updateMasternodeP2P({
       pubkey: response.pubkey,
-      version: response.version,
+      version: (response.canConnect) ? String(response.version) : '',
       canConnect: response.canConnect,
-      subver: response.client
+      subver: (response.canConnect) ? response.client : ''
     }));
   });
   Promise.all(promises)

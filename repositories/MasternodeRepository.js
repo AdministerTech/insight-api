@@ -77,7 +77,7 @@ MasternodeRepository.prototype.updateMasternodeLastPaid = function(pubkey, block
 
 MasternodeRepository.prototype.updateInternalCache = function() {
   let self = this;
-  MasternodeStats.find({}).exec()
+  MasternodeStats.find({}, {_id: 0, __v: 0}).exec()
   .then(function(results) {
     self.mnCache = results;
   })
