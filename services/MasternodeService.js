@@ -129,7 +129,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
         }));
       }
     })
-    .error(function(error) {
+    .catch(function(error) {
       self.common.log.info('[MasternodeService] p2p promise error ' + error);
       if (index < masternodes.length - 1) {
         index++;
