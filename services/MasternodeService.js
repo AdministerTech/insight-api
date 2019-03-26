@@ -219,31 +219,17 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 3000) {
       self.common.log.info('[MasternodeService] got version: ' + connectOptions.host + ' client: ' + version.client);
     });
     mnConnection.on('error', function(e) {
+      self.common.log.info('[MasternodeService] BTCP2P onError: ' + connectOptions.host + ' client: ' + version.client);
       version = Object.assign({}, {pubkey: mnInfo.pubkey, error: e});
-      reject({
-        canConnect,
-        version: {
-          pubkey: mnInfo.pubkey,
-          error: e
-        }
-      });
+      reject(Object.assign({}, canConnect, version: {pubkey: mnInfo.pubkey, error: e}));
     });
     mnConnection.on('disconnect', function(e) {
       self.common.log.info('[MasternodeService] disconnected from: ' + connectOptions.host);
-      resolve({
-        canConnect,
-        version
-      });
+      resolve(Object.assign({}, version, {canConnect: canConnect}));
     });
     setTimeout(function() {
       if (!canConnect) {
-        resolve({
-          canConnect,
-          version: {
-            pubkey: mnInfo.pubkey,
-            error: 'timeout'
-          }
-        });
+        resolve(Object.assign({}, canConnect, version: {pubkey: mnInfo.pubkey, error: 'timeout'}));
       }
     }, timeout);
   })
