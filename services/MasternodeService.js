@@ -90,6 +90,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
     let index = 0;
     const executePromise = function(promise, success, error) {
       promise.then(function(response) {
+        self.common.log.info('[MasternodeService] got p2p response: ' + response.client + response.host);
         self.updateP2PinDB(response);
       })
       .catch(function(error) {
@@ -125,7 +126,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
 MasternodeService.prototype.updateP2PinDB = function(response) {
   let self = this;
   let promises = [];
-  self.common.log.info('[MasternodeService] got p2p responses: ' + response.client);
+
   // p2pResponses.forEach(function(response) {
   //   self.common.log.info('[MasternodeService] client: ' + response.client);
   //   promises.push();
@@ -162,7 +163,7 @@ mnInfo {
   pubkey: string
 }
 */
-MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
+MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 3000) {
   let self = this;
   return new Promise(function(resolve, reject) {
     const connectOptions = Object.assign({}, NodeDefaultOptions, {host: mnInfo.host, port: mnInfo.port});
@@ -176,7 +177,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
     mnConnection.on('version', function(e) {
       version = Object.assign({}, e, {pubkey: mnInfo.pubkey});
       mnConnection.client.end();
-      self.common.log.info('[MasternodeService] got version: ' + connectOptions.host + ' client: ' + e.client);
+      self.common.log.info('[MasternodeService] got version: ' + connectOptions.host + ' client: ' + version.client);
     });
     mnConnection.on('error', function(e) {
       resolve({
@@ -188,6 +189,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
       });
     });
     mnConnection.on('disconnect', function(e) {
+      self.common.log.info('[MasternodeService] disconnected from: ' + connectOptions.host);
       resolve({
         canConnect,
         version
