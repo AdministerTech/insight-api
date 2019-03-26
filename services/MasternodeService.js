@@ -130,7 +130,11 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
       }
     })
     .catch(function(error) {
-      self.common.log.info('[MasternodeService] p2p promise error: ' + error.error.message);
+      try {
+        self.common.log.info('[MasternodeService] p2p promise error: ' + error.error.message);
+      } catch (e) {
+        self.common.log.info('[MasternodeService] p2p promise error');
+      }
       if (index < masternodes.length - 1) {
         index++;
         executePromise(self.getP2PInfo({
