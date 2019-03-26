@@ -118,7 +118,7 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
   let index = 0;
   const executePromise = function(promise) {
     promise.then(function(response) {
-      self.common.log.info('[MasternodeService] got p2p response: ' + response.client + response.host);
+      self.common.log.info('[MasternodeService] got p2p response: ' + response.version.client + response.version.host);
       self.updateP2PinDB(response);
     })
     .error(function(error) {
@@ -176,10 +176,10 @@ MasternodeService.prototype.updateP2PinDB = function(response) {
 
 
   self.masternodeRepository.updateMasternodeP2P({
-    pubkey: response.pubkey,
-    version: (response.canConnect) ? String(response.version) : '',
+    pubkey: response.version.pubkey,
+    version: (response.canConnect) ? String(response.version.version) : '',
     canConnect: response.canConnect,
-    subver: (response.canConnect) ? response.client : ''
+    subver: (response.canConnect) ? response.version.client : ''
   })
   .then(function(result) {
     self.masternodeRepository.updateInternalCache();
@@ -213,6 +213,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 3000) {
       self.common.log.info('[MasternodeService] got version: ' + connectOptions.host + ' client: ' + version.client);
     });
     mnConnection.on('error', function(e) {
+      version = Object.assign({}, {pubkey: mnInfo.pubkey, error: e});
       resolve({
         canConnect,
         version: {
