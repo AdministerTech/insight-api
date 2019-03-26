@@ -120,11 +120,17 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
     promise.then(function(response) {
       self.common.log.info('[MasternodeService] got p2p response: ' + response.version.client + response.version.host);
       self.updateP2PinDB(response);
+      if (index < masternodes.length - 1) {
+        index++;
+        executePromise(self.getP2PInfo({
+          host: masternodes[index].host,
+          port: masternodes[index].port,
+          pubkey: masternodes[index].pubkey
+        }));
+      }
     })
     .error(function(error) {
       self.common.log.info('[MasternodeService] p2p promise error ' + error);
-    })
-    .finally(function(error) {
       if (index < masternodes.length - 1) {
         index++;
         executePromise(self.getP2PInfo({
@@ -214,7 +220,7 @@ MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 3000) {
     });
     mnConnection.on('error', function(e) {
       version = Object.assign({}, {pubkey: mnInfo.pubkey, error: e});
-      resolve({
+      reject({
         canConnect,
         version: {
           pubkey: mnInfo.pubkey,
