@@ -1,7 +1,9 @@
 const MasternodeStats = require('../models/MasternodeStats');
 const async = require('async');
 
-function MasternodeRepository() {}
+function MasternodeRepository() {
+  this.mnCache = [];
+}
 
 function getMasternodePubkey(pubkey) {
   return MasternodeStats.findOne({MasternodePubkey: pubkey}, {MasternodePubkey: 1}).exec()
@@ -71,6 +73,17 @@ MasternodeRepository.prototype.updateMasternodeLastPaid = function(pubkey, block
       MNLastPaidAmount, amount
     }
   }}).exec()
+}
+
+MasternodeRepository.prototype.updateInternalCache = function() {
+  let self = this;
+  MasternodeStats.find({}).exec()
+  .then(function(results) {
+    self.mnCache = results;
+  })
+  .catch(function(error) {
+    // error in find all, not likely
+  });
 }
 
 module.exports = MasternodeRepository;

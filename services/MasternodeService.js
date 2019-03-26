@@ -21,8 +21,8 @@ MasternodeService.prototype.start = function(next) {
   let self = this;
 
   self.common.log.info('[MasternodeService] Start...');
+  self.masternodeRepository.updateInternalCache();
   self.tryGetList();
-
   return next();
 };
 
@@ -31,7 +31,7 @@ MasternodeService.prototype.tryGetList = function() {
   const listPoll = setInterval(function() {
     const mnListHandler = function(error, result) {
       if (error) {
-        self.common.log.info('[MasternodeService] error' + error);
+        self.common.log.info('[MasternodeService] error ' + error);
       } else {
         if (result.length > 0) {
           self.mnListFromNode = result;
@@ -78,12 +78,8 @@ MasternodeService.prototype.updateMasternodeBasics = function() {
     self.updateMasternodesP2P();
   })
   .catch(function(error) {
-    self.common.log.info('[MasternodeService] error' + error);
+    self.common.log.info('[MasternodeService] error ' + error);
   });
-};
-
-MasternodeService.prototype.updateMasternodeLastSeen = function() {
-
 };
 
 MasternodeService.prototype.updateMasternodesP2P = function() {
@@ -95,21 +91,41 @@ MasternodeService.prototype.updateMasternodesP2P = function() {
     const port = fullHost[1];
     const pubkey = mn.payee;
     p2pInfoPromises.push(self.getP2PInfo({
-      host: host,
-      port: port,
-      pubkey: pubkey
+      host,
+      port,
+      pubkey
     }));
   });
   Promise.all(p2pInfoPromises)
   .then(function(responses) {
-    responses.forEach(function(response) {
-      self.common.log.info('[MasternodeService] p2p info ' + response);
-    })
+    self.updateP2PinDB(responses);
   })
   .catch(function(error) {
-    self.common.log.info('[MasternodeService] p2p promise error' + error);
+    self.common.log.info('[MasternodeService] p2p promise error ' + error);
   })
 };
+
+MasternodeService.prototype.updateP2PinDB = function(p2pResponses) {
+  let self = this;
+  let promises = [];
+  p2pResponses.forEach(function(response) {
+    promises.push(self.masternodeRepository.updateMasternodeP2P({
+      pubkey: response.pubkey,
+      version: response.version,
+      canConnect: response.canConnect,
+      subver: response.client
+    }));
+  });
+  Promise.all(promises)
+  .then(function(responses) {
+    //success
+    self.masternodeRepository.updateInternalCache();
+  })
+  .catch(function(error) {
+    //fail
+    self.common.log.info('[MasternodeService] error ' + error);
+  });
+}
 
 /*
 mnInfo {
@@ -121,18 +137,15 @@ mnInfo {
 MasternodeService.prototype.getP2PInfo = function(mnInfo, timeout = 5000) {
   let self = this;
   return new Promise(function(resolve, reject) {
-    const connectOptions = Object.assign(NodeDefaultOptions, {host: mnInfo.host, port: mnInfo.port});
-    // self.common.log.info('[MasternodeService] p2p conn info ' + connectOptions);
+    const connectOptions = Object.assign({}, NodeDefaultOptions, {host: mnInfo.host, port: mnInfo.port});
     const mnConnection = new BTCP2P(connectOptions);
     let canConnect = false;
     let version = {};
     mnConnection.on('connect', function(e) {
-      // self.common.log.info('[MasternodeService] p2p connected ' + mnInfo.host);
       canConnect = true;
     });
     mnConnection.on('version', function(e) {
-      // self.common.log.info('[MasternodeService] p2p version ' + e);
-      version = Object.assign(e, {pubkey: mnInfo.pubkey});
+      version = Object.assign({}, e, {pubkey: mnInfo.pubkey});
       mnConnection.client.end();
     });
     mnConnection.on('error', function(e) {
