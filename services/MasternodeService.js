@@ -84,42 +84,74 @@ MasternodeService.prototype.updateMasternodeBasics = function() {
 
 MasternodeService.prototype.updateMasternodesP2P = function() {
   let self = this;
-  let p2pInfoPromises = [];
+  // let p2pInfoPromises = [];
+  //
+  // const sequentialPromises = function(promises, success, error) {
+  //   let index = 0;
+  //   const executePromise = function(promise) {
+  //     promise.then(function(response) {
+  //       self.common.log.info('[MasternodeService] got p2p response: ' + response.client + response.host);
+  //       self.updateP2PinDB(response);
+  //     })
+  //     .catch(function(error) {
+  //       self.common.log.info('[MasternodeService] p2p promise error ' + error);
+  //     })
+  //     .finally(function() {
+  //       if (index < promises.length - 1) {
+  //         index++;
+  //         executePromise(promises[index]);
+  //       }
+  //     });
+  //   }
+  //
+  //   executePromise(promises[index]);
+  // }
 
-  const sequentialPromises = function(promises, success, error) {
-    let index = 0;
-    const executePromise = function(promise, success, error) {
-      await promise.then(function(response) {
-        self.common.log.info('[MasternodeService] got p2p response: ' + response.client + response.host);
-        self.updateP2PinDB(response);
-      })
-      .catch(function(error) {
-        self.common.log.info('[MasternodeService] p2p promise error ' + error);
-      })
-      .finally(function() {
-        if (index < promises.length - 1) {
-          index++;
-          executePromise(promises[index]);
-        }
-      });
+  const masternodes = self.mnListFromNode.map(function(mn) {
+    const fullHost = mn.ip.split(':');
+    return {
+      host: fullHost[0],
+      port: fullHost[1],
+      pubkey: mn.payee
     }
-
-    executePromise(promises[index]);
+  });
+  let index = 0;
+  const executePromise = function(promise) {
+    promise.then(function(response) {
+      self.common.log.info('[MasternodeService] got p2p response: ' + response.client + response.host);
+      self.updateP2PinDB(response);
+    })
+    .error(function(error) {
+      self.common.log.info('[MasternodeService] p2p promise error ' + error);
+    })
+    .finally(function(error) {
+      if (index < masternodes.length - 1) {
+        index++;
+        executePromise(self.getP2PInfo({
+          host: masternodes[index].host,
+          port: masternodes[index].port,
+          pubkey: masternodes[index].pubkey
+        }));
+      }
+    })
   }
 
-  self.mnListFromNode.forEach(function(mn) {
-    const fullHost = mn.ip.split(':');
-    const host = fullHost[0];
-    const port = fullHost[1];
-    const pubkey = mn.payee;
-    p2pInfoPromises.push(self.getP2PInfo({
-      host,
-      port,
-      pubkey
-    }));
-  });
+  executePromise(self.getP2PInfo({
+    host: masternodes[index].host,
+    port: masternodes[index].port,
+    pubkey: masternodes[index].pubkey
+  }));
 
-  sequentialPromises(p2pInfoPromises);
+  // self.mnListFromNode.forEach(function(mn) {
+  //   const mnInfo = nodeInfo(mn);
+  //   p2pInfoPromises.push(self.getP2PInfo({
+  //     host,
+  //     port,
+  //     pubkey
+  //   }));
+  // });
+
+  // sequentialPromises(p2pInfoPromises);
 };
 
 
