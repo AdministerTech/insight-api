@@ -31,6 +31,40 @@ MasternodeRepository.prototype.updateMasternodeBasics = function(mnInfo) {
   }}, {upsert: true}).exec()
 }
 
+// MasternodeRepository.prototype.updateMasternodeBasics = function(mnInfo) {
+//   let self = this;
+//   return new Promise(function(resolve, reject) {
+//     self.getMasternodePubkey(mnInfo.pubkey)
+//     .then(function(result) {
+//       if (result.MasternodePubkey === mnInfo.pubkey) {
+//         resolve(MasternodeStats.fineOneAndUpdate({MasternodePubkey: mnInfo.pubkey}, {$set: {
+//           MasternodeOutputHash: mnInfo.outputHash,
+//           MasternodeOutputIndex: mnInfo.outputIndex,
+//           MasternodeIP: mnInfo.host,
+//           MasternodePort: mnInfo.port,
+//           MasternodeProtocol: mnInfo.protocol,
+//           MasternodeLastSeen: mnInfo.lastseen,
+//           MasternodeActiveSeconds: mnInfo.activeseconds
+//         }}).exec());
+//       } else {
+//         resolve(MasternodeStats.insert({MasternodePubkey: mnInfo.pubkey}, {$set: {
+//           MasternodeOutputHash: mnInfo.outputHash,
+//           MasternodeOutputIndex: mnInfo.outputIndex,
+//           MasternodeIP: mnInfo.host,
+//           MasternodePort: mnInfo.port,
+//           MasternodePubkey: mnInfo.pubkey,
+//           MasternodeProtocol: mnInfo.protocol,
+//           MasternodeLastSeen: mnInfo.lastseen,
+//           MasternodeActiveSeconds: mnInfo.activeseconds
+//         }}).exec());
+//       }
+//     })
+//     .catch(function(error) {
+//       reject(error);
+//     })
+//   })
+// }
+
 MasternodeRepository.prototype.updateMasternodeLastSeen = function(pubkey, lastSeen) {
   return MasternodeStats.update({MasternodePubkey: pubkey}, {$set: {MasternodeLastSeen: lastSeen}}).exec()
 }

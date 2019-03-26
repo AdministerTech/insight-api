@@ -186,10 +186,10 @@ MasternodeService.prototype.updateP2PinDB = function(response) {
 
 
   self.masternodeRepository.updateMasternodeP2P({
-    pubkey: response.version.pubkey,
-    version: (response.canConnect) ? String(response.version.version) : '',
+    pubkey: response.pubkey,
+    version: (response.canConnect) ? String(response.version) : '',
     canConnect: response.canConnect,
-    subver: (response.canConnect) ? response.version.client : ''
+    subver: (response.canConnect) ? response.client : ''
   })
   .then(function(result) {
     self.masternodeRepository.updateInternalCache();
